@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 # Python version: 3.6
-#python federated_main.py --model=vae --dataset=mnist --gpu=cuda:0 --iid=2 --epochs=10 --dirichlet=0.3 --frac=1.0 --num_users=4 --local_ep=1
+#python federated_main.py --model=vae --dataset=mnist --gpu=cuda:0 --iid=2 --epochs=30 --dirichlet=0.4 --frac=1.0 --num_users=10 --local_ep=10
+
 
 
 import os
@@ -92,6 +93,10 @@ if __name__ == '__main__':
             w, loss = local_model.update_weights(
                 model=model_copy, global_round=epoch)
             local_weights.append(copy.deepcopy(w))
+            print(f"actual loss: {loss}")
+            if(np.isnan(loss)):
+                print("loss was nan!!!!!!!!!!!!!!!")
+                loss = local_losses[-1] if len(local_losses) > 0 else 0
             local_losses.append(copy.deepcopy(loss))
 
         # update global weights
@@ -130,8 +135,8 @@ if __name__ == '__main__':
     print("|---- Test Accuracy: {:.2f}%".format(100*test_acc))
 
     # Saving the objects train_loss and train_accuracy:
-    file_name = '../save/objects/{}_{}_{}_C[{}]_iid[{}]_E[{}]_B[{}].pkl'.\
-        format(args.dataset, args.model, args.epochs, args.frac, args.iid,
+    file_name = '../save/objects/{}_{}_{}_{}_C[{}]_iid[{}]_E[{}]_B[{}].pkl'.\
+        format(args.dirichlet, args.dataset, args.model, args.epochs, args.frac, args.iid,
                args.local_ep, args.local_bs)
 
     with open(file_name, 'wb') as f:
@@ -150,8 +155,8 @@ if __name__ == '__main__':
     plt.plot(range(len(train_loss)), train_loss, color='r')
     plt.ylabel('Training loss')
     plt.xlabel('Communication Rounds')
-    plt.savefig('../save/fed_{}_{}_{}_C[{}]_iid[{}]_E[{}]_B[{}]_loss.png'.
-                format(args.dataset, args.model, args.epochs, args.frac,
+    plt.savefig('../save/fed_{}_{}_{}_{}_C[{}]_iid[{}]_E[{}]_B[{}]_loss.png'.
+                format(args.dirichlet, args.dataset, args.model, args.epochs, args.frac,
                        args.iid, args.local_ep, args.local_bs))
 
     # Plot Average Accuracy vs Communication rounds
@@ -160,6 +165,6 @@ if __name__ == '__main__':
     plt.plot(range(len(train_accuracy)), train_accuracy, color='k')
     plt.ylabel('Average Accuracy')
     plt.xlabel('Communication Rounds')
-    plt.savefig('../save/fed_{}_{}_{}_C[{}]_iid[{}]_E[{}]_B[{}]_acc.png'.
-                format(args.dataset, args.model, args.epochs, args.frac,
+    plt.savefig('../save/fed_{}_{}_{}_{}_C[{}]_iid[{}]_E[{}]_B[{}]_acc.png'.
+                format(args.dirichlet, args.dataset, args.model, args.epochs, args.frac,
                        args.iid, args.local_ep, args.local_bs))

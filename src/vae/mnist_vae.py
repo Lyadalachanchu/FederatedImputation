@@ -1,13 +1,14 @@
 import os
 import sys
 
+import numpy as np
 from torch.utils.data import DataLoader
 from torch.distributions.normal import Normal
 
 module_to_import = os.path.dirname(sys.path[0])
 sys.path.append(module_to_import)
 
-from utils import kl_loss, vae_loss_fn, vae_classifier_loss_fn
+from src.utils import kl_loss, vae_loss_fn, vae_classifier_loss_fn
 
 import torch
 from torch import Tensor
@@ -259,7 +260,7 @@ class VaeAutoencoderClassifier(nn.Module):
     def train_model(
             self,
             training_data,
-            batch_size=64,
+            batch_size=32,
             alpha=1.0,
             beta=1.0,
             epochs=5
@@ -279,7 +280,8 @@ class VaeAutoencoderClassifier(nn.Module):
         classifier_loss_li = []
         vae_loss_li = []
         kl_loss_li = []
-
+        batch_losses = []
+        print(f"num trainloader batches: {len(training_dataloader)}")
         for epoch in range(epochs):
             i = 0
             for input, labels in training_dataloader:
@@ -301,15 +303,17 @@ class VaeAutoencoderClassifier(nn.Module):
                     self.z_dist,
                     labels
                 )
-
+                batch_losses.append(loss.item())
                 # back propagation
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
                 i += 1
                 if i % batch_size == 0:
-                    self.losses.append(loss.item())
-
+                    self.losses.append(np.mean(np.array(batch_losses)))
+                    # print(f"local loss per batch {i/batch_size}: {self.losses[-1]}")
+                    # print(f"batchlosses: {batch_losses}")
+                    batch_losses = []
                     # calculate accuracy
                     matches_labels = (torch.argmax(output[1], 1) == labels)
                     accuracy = torch.mean(matches_labels.float())

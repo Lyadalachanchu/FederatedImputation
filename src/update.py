@@ -69,7 +69,10 @@ class LocalUpdate(object):
             optimizer = torch.optim.Adam(model.parameters(), lr=self.args.lr,
                                          weight_decay=1e-4)
         if self.args.model == 'vae' or model is isinstance(model, VaeAutoencoderClassifier):
-            loss = np.mean(model.train_model(self.trainloader.dataset, epochs=self.args.local_ep)[1])
+            print(f"length train: {len(self.trainloader.dataset)}")
+            local_losses = model.train_model(self.trainloader.dataset, epochs=self.args.local_ep)[1]
+            print(f"losses: {local_losses}")
+            loss = np.mean(local_losses)
             print(loss)
             return model.state_dict(), loss
         else:
@@ -112,7 +115,7 @@ class LocalUpdate(object):
                 loss += complete_loss_fn(images, outputs, model.z_dist, labels)
                 _, pred_labels = torch.max(outputs[1], 1)
                 pred_labels = pred_labels.view(-1)
-                print(f"pred labels: {pred_labels}, labels: {labels}")
+                # print(f"pred labels: {pred_labels}, labels: {labels}")
                 correct += torch.sum(torch.eq(pred_labels, labels)).item()
                 total += len(labels)
             else:
