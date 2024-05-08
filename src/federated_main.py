@@ -76,6 +76,8 @@ if __name__ == '__main__':
     cv_loss, cv_acc = [], []
     print_every = 2
     val_loss_pre, counter = 0, 0
+    test_losses_per_client, test_accuracies_per_client = np.zeros((args.num_users, args.epochs)), np.zeros((args.num_users, args.epochs))
+    train_losses_per_client = np.zeros((args.num_users, args.epochs))
 
     for epoch in tqdm(range(args.epochs)):
         local_weights, local_losses = [], []
@@ -88,11 +90,16 @@ if __name__ == '__main__':
         for idx in idxs_users:
             local_model = LocalUpdate(args=args, dataset=train_dataset,
                                       idxs=user_groups[idx], logger=logger)
-            model_copy = type(global_model)()  # create a new instance of the same model
-            model_copy.load_state_dict(global_model.state_dict())
+            model_copy = None
+            if(args.model == 'vae'):
+                model_copy = type(global_model)()  # create a new instance of the same model
+                model_copy.load_state_dict(global_model.state_dict())
+            else:
+                model_copy = copy.deepcopy(global_model)
             w, loss = local_model.update_weights(
                 model=model_copy, global_round=epoch)
             local_weights.append(copy.deepcopy(w))
+            train_losses_per_client[idx][epoch] = loss
             print(f"actual loss: {loss}")
             if(np.isnan(loss)):
                 print("loss was nan!!!!!!!!!!!!!!!")
@@ -117,7 +124,8 @@ if __name__ == '__main__':
                                       idxs=user_groups[c], logger=logger)
             acc, loss = local_model.inference(model=global_model)
             list_acc.append(acc)
-            list_loss.append(loss)
+            test_losses_per_client[c][epoch] = loss
+            test_accuracies_per_client[c][epoch] = acc
             print("fsdf", acc, loss)
         train_accuracy.append(sum(list_acc)/len(list_acc))
 
@@ -133,14 +141,13 @@ if __name__ == '__main__':
     print(f' \n Results after {args.epochs} global rounds of training:')
     print("|---- Avg Train Accuracy: {:.2f}%".format(100*train_accuracy[-1]))
     print("|---- Test Accuracy: {:.2f}%".format(100*test_acc))
-
     # Saving the objects train_loss and train_accuracy:
     file_name = '../save/objects/{}_{}_{}_{}_C[{}]_iid[{}]_E[{}]_B[{}].pkl'.\
         format(args.dirichlet, args.dataset, args.model, args.epochs, args.frac, args.iid,
                args.local_ep, args.local_bs)
 
     with open(file_name, 'wb') as f:
-        pickle.dump([train_loss, train_accuracy], f)
+        pickle.dump([train_losses_per_client, test_losses_per_client, test_accuracies_per_client], f)
 
     print('\n Total Run Time: {0:0.4f}'.format(time.time()-start_time))
 
@@ -168,3 +175,5 @@ if __name__ == '__main__':
     plt.savefig('../save/fed_{}_{}_{}_{}_C[{}]_iid[{}]_E[{}]_B[{}]_acc.png'.
                 format(args.dirichlet, args.dataset, args.model, args.epochs, args.frac,
                        args.iid, args.local_ep, args.local_bs))
+
+    torch.save(global_model.state_dict(), f"C:\\Users\\lyada\\Desktop\\Federated-Learning-PyTorch\\vae_data\\models\\{args.model}_{args.dirichlet}.pth")
