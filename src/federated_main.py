@@ -176,4 +176,4 @@ if __name__ == '__main__':
                 format(args.dirichlet, args.dataset, args.model, args.epochs, args.frac,
                        args.iid, args.local_ep, args.local_bs))
 
-    torch.save(global_model.state_dict(), f"C:\\Users\\lyada\\Desktop\\Federated-Learning-PyTorch\\vae_data\\models\\{args.model}_{args.dirichlet}.pth")
+    torch.save(global_model.state_dict(), f"C:\\Users\\LohithSai\\Desktop\\FederatedImputation\\vae_data\models\\{args.model}_{args.dirichlet}.pth")
