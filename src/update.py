@@ -2,12 +2,14 @@
 # -*- coding: utf-8 -*-
 # Python version: 3.6
 import random
-
+import torch
+import torch.nn.functional as F
 import numpy as np
 import torch
 from torch import nn
 from torch.utils.data import DataLoader, Dataset
 
+from impute import impute_naive
 from utils import vae_classifier_loss_fn
 from vae.mnist_vae import VaeAutoencoderClassifier
 
@@ -48,7 +50,16 @@ class LocalUpdate(object):
         idxs_train = idxs[:int(0.8*len(idxs))]
         idxs_val = idxs[int(0.8*len(idxs)):int(0.9*len(idxs))]
         idxs_test = idxs[int(0.9*len(idxs)):]
-        trainloader = DataLoader(DatasetSplit(dataset, idxs_train),
+
+        train_dataset = DatasetSplit(dataset, idxs_train)
+        trained_vae = VaeAutoencoderClassifier(dim_encoding=2)
+        trained_vae.load_state_dict(torch.load("C:\\Users\\lyada\\Desktop\\Federated-Learning-PyTorch\\vae_data"
+                                               f"\\models\\vae_{self.args.dirichlet}.pth"))
+        generated_train_dataset = impute_naive(k=self.args.num_generate, trained_vae=trained_vae, initial_dataset=train_dataset)
+        generated_train_dataset = [(torch.tensor(image), torch.tensor(label)) for image, label in
+                                           generated_train_dataset]
+
+        trainloader = DataLoader(generated_train_dataset,
                                  batch_size=self.args.local_bs, shuffle=True)
         validloader = DataLoader(DatasetSplit(dataset, idxs_val),
                                  batch_size=int(len(idxs_val)/10), shuffle=True)
@@ -82,12 +93,15 @@ class LocalUpdate(object):
                     images, labels = images.to(self.device), labels.to(self.device)
 
                     model.zero_grad()
-                    log_probs = model(images)
+                    log_probs = F.softmax(model(images), dim=1)
+                    # print(f"log probs? {log_probs}")
+                    # print(f"sum: {sum(log_probs)}")
                     loss = self.criterion(log_probs, labels)
                     loss.backward()
                     optimizer.step()
 
                     if self.args.verbose and (batch_idx % 10 == 0):
+                        print(f"Loss: {loss.item()}")
                         print('| Global Round : {} | Local Epoch : {} | [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
                             global_round, iter, batch_idx * len(images),
                             len(self.trainloader.dataset),

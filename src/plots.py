@@ -65,6 +65,16 @@ def plot_image_label(images: np.ndarray, label_probabilities: np.ndarray):
         plt.imshow(squeezed_img)
         digit = np.argmax(label_probabilities[i])
         plt.title(digit)
+def plot_image_label(image: np.ndarray, digit: int):
+    """
+    Generate 5 subplots
+    """
+    plt.figure()
+    plt.subplot(151)
+    plt.axis('off')
+    squeezed_img = np.squeeze(image)
+    plt.imshow(squeezed_img)
+    plt.title(digit)
 
 
 def plot_image_label_two(images: np.ndarray, labels: np.ndarray):

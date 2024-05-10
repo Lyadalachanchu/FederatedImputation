@@ -1,7 +1,7 @@
 import numpy as np
 import torch.utils.data
 
-from src.vae.mnist_vae import VaeAutoencoderClassifier
+from vae.mnist_vae import VaeAutoencoderClassifier
 
 
 def impute_naive(k, trained_vae:VaeAutoencoderClassifier, initial_dataset):

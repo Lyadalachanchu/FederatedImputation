@@ -60,6 +60,7 @@ def args_parser():
     parser.add_argument('--stopping_rounds', type=int, default=10,
                         help='rounds of early stopping')
     parser.add_argument('--verbose', type=int, default=1, help='verbose')
+    parser.add_argument('--num_generate', type=int, default=30, help='number of generated images to impute')
     parser.add_argument('--seed', type=int, default=1, help='random seed')
     args = parser.parse_args()
     return args

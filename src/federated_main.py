@@ -18,7 +18,7 @@ from tensorboardX import SummaryWriter
 from options import args_parser
 from vae.mnist_vae import VaeAutoencoderClassifier
 from update import LocalUpdate, test_inference
-from models import MLP, CNNMnist, CNNFashion_Mnist, CNNCifar
+from models import MLP, CNNMnist, CNNFashion_Mnist, CNNCifar, ExquisiteNetV2, ExquisiteNetV1
 from utils import get_dataset, average_weights, exp_details, fed_avg
 
 if __name__ == '__main__':
@@ -59,6 +59,9 @@ if __name__ == '__main__':
 
     elif args.model == 'vae':
         global_model = VaeAutoencoderClassifier(dim_encoding=2)
+
+    elif args.model == 'exq':
+        global_model = ExquisiteNetV1(class_num=10, img_channels=1)
     else:
         exit('Error: unrecognized model')
 
@@ -142,7 +145,7 @@ if __name__ == '__main__':
     print("|---- Avg Train Accuracy: {:.2f}%".format(100*train_accuracy[-1]))
     print("|---- Test Accuracy: {:.2f}%".format(100*test_acc))
     # Saving the objects train_loss and train_accuracy:
-    file_name = '../save/objects/{}_{}_{}_{}_C[{}]_iid[{}]_E[{}]_B[{}].pkl'.\
+    file_name = '../save/objects/fedimputed_{}_{}_{}_{}_C[{}]_iid[{}]_E[{}]_B[{}].pkl'.\
         format(args.dirichlet, args.dataset, args.model, args.epochs, args.frac, args.iid,
                args.local_ep, args.local_bs)
 
@@ -162,7 +165,7 @@ if __name__ == '__main__':
     plt.plot(range(len(train_loss)), train_loss, color='r')
     plt.ylabel('Training loss')
     plt.xlabel('Communication Rounds')
-    plt.savefig('../save/fed_{}_{}_{}_{}_C[{}]_iid[{}]_E[{}]_B[{}]_loss.png'.
+    plt.savefig('../save/fedimputed_{}_{}_{}_{}_C[{}]_iid[{}]_E[{}]_B[{}]_loss.png'.
                 format(args.dirichlet, args.dataset, args.model, args.epochs, args.frac,
                        args.iid, args.local_ep, args.local_bs))
 
@@ -172,8 +175,8 @@ if __name__ == '__main__':
     plt.plot(range(len(train_accuracy)), train_accuracy, color='k')
     plt.ylabel('Average Accuracy')
     plt.xlabel('Communication Rounds')
-    plt.savefig('../save/fed_{}_{}_{}_{}_C[{}]_iid[{}]_E[{}]_B[{}]_acc.png'.
+    plt.savefig('../save/fedimputed_{}_{}_{}_{}_C[{}]_iid[{}]_E[{}]_B[{}]_acc.png'.
                 format(args.dirichlet, args.dataset, args.model, args.epochs, args.frac,
                        args.iid, args.local_ep, args.local_bs))
 
-    torch.save(global_model.state_dict(), f"C:\\Users\\LohithSai\\Desktop\\FederatedImputation\\vae_data\models\\{args.model}_{args.dirichlet}.pth")
+    torch.save(global_model.state_dict(), f"C:\\Users\\lyada\\Desktop\\Federated-Learning-PyTorch\\vae_data\models\\{args.num_generate}_{args.model}_{args.dirichlet}.pth")

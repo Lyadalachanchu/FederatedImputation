@@ -12,8 +12,7 @@ from torch.utils.data import DataLoader
 from utils import get_dataset
 from options import args_parser
 from update import test_inference
-from models import MLP, CNNMnist, CNNFashion_Mnist, CNNCifar
-
+from models import MLP, CNNMnist, CNNFashion_Mnist, CNNCifar, ExquisiteNetV1
 
 if __name__ == '__main__':
     args = args_parser()
@@ -41,6 +40,8 @@ if __name__ == '__main__':
             len_in *= x
             global_model = MLP(dim_in=len_in, dim_hidden=64,
                                dim_out=args.num_classes)
+    elif args.model == 'exq':
+        global_model = ExquisiteNetV1(class_num=10, img_channels=1)
     else:
         exit('Error: unrecognized model')
 
@@ -113,3 +114,4 @@ if __name__ == '__main__':
     plt.ylabel('Test accuracy')
     plt.savefig('../save/nn_test_acc_{}_{}_{}.png'.format(args.dataset, args.model,
                                                  args.epochs))
+    torch.save(global_model.state_dict(), f"C:\\Users\\lyada\\Desktop\\Federated-Learning-PyTorch\\vae_data\models\\BASELINE_EXQ.pth")
