@@ -53,8 +53,9 @@ class LocalUpdate(object):
 
         train_dataset = DatasetSplit(dataset, idxs_train)
         trained_vae = VaeAutoencoderClassifier(dim_encoding=2)
-        trained_vae.load_state_dict(torch.load("C:\\Users\\lyada\\Desktop\\Federated-Learning-PyTorch\\vae_data"
+        trained_vae.load_state_dict(torch.load("C:\\Users\\LohithSai\\Desktop\\FederatedImputation\\vae_data"
                                                f"\\models\\vae_{self.args.dirichlet}.pth"))
+
         generated_train_dataset = impute_naive(k=self.args.num_generate, trained_vae=trained_vae, initial_dataset=train_dataset)
         generated_train_dataset = [(torch.tensor(image), torch.tensor(label)) for image, label in
                                            generated_train_dataset]
