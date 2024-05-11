@@ -38,7 +38,10 @@ class LocalUpdate(object):
             dataset, list(idxs))
         self.device = 'cuda' if args.gpu else 'cpu'
         # Default criterion set to NLL loss function
-        self.criterion = nn.NLLLoss().to(self.device)
+        if args.model == 'exq':
+            self.criterion = nn.CrossEntropyLoss().to(self.device)
+        else:
+            self.criterion = nn.NLLLoss().to(self.device)
 
     def train_val_test(self, dataset, idxs):
         """
@@ -94,7 +97,13 @@ class LocalUpdate(object):
                     images, labels = images.to(self.device), labels.to(self.device)
 
                     model.zero_grad()
-                    log_probs = F.softmax(model(images), dim=1)
+                    if images.size(0) == 1:
+                        print("eval")
+                        model.eval()
+                    log_probs = model(images)
+                    # Switch back to train mode
+                    if images.size(0) == 1:
+                        model.train()
                     # print(f"log probs? {log_probs}")
                     # print(f"sum: {sum(log_probs)}")
                     loss = self.criterion(log_probs, labels)

@@ -676,6 +676,7 @@ class ExquisiteNetV1(nn.Module):
         x = self.drop(x)
         x = x.view(-1, x.size()[1])
         x = self.fc(x)
+        # x = F.log_softmax(x, dim=1)
         return x
 
 
