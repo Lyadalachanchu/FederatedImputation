@@ -16,9 +16,10 @@ import torch
 from tensorboardX import SummaryWriter
 
 from options import args_parser
+from models import ResNet
 from vae.mnist_vae import VaeAutoencoderClassifier
 from update import LocalUpdate, test_inference
-from models import MLP, CNNMnist, CNNFashion_Mnist, CNNCifar, ExquisiteNetV2, ExquisiteNetV1
+from models import MLP, CNNMnist, CNNFashion_Mnist, CNNCifar, ExquisiteNetV2, ExquisiteNetV1, BasicBlock
 from utils import get_dataset, average_weights, exp_details, fed_avg
 
 if __name__ == '__main__':
@@ -62,6 +63,10 @@ if __name__ == '__main__':
 
     elif args.model == 'exq':
         global_model = ExquisiteNetV1(class_num=10, img_channels=1)
+
+    elif args.model == 'resnet':
+        global_model = ResNet(BasicBlock, [2,2,2,2])
+
     else:
         exit('Error: unrecognized model')
 
@@ -179,4 +184,4 @@ if __name__ == '__main__':
                 format(args.num_generate, args.dirichlet, args.dataset, args.model, args.epochs, args.frac,
                        args.iid, args.local_ep, args.local_bs))
 
-    torch.save(global_model.state_dict(), f"C:\\Users\\LohithSai\\Desktop\\FederatedImputation\\vae_data\models\\{args.num_generate}_{args.model}_{args.dirichlet}.pth")
+    torch.save(global_model.state_dict(), f"C:\\Users\\lyada\\Desktop\\Federated-Learning-PyTorch\\vae_data\models\\{args.num_generate}_{args.model}_{args.dirichlet}.pth")

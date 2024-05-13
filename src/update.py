@@ -6,7 +6,7 @@ import torch
 import torch.nn.functional as F
 import numpy as np
 import torch
-from torch import nn
+from torch import nn, optim
 from torch.utils.data import DataLoader, Dataset
 
 from impute import impute_naive
@@ -38,7 +38,7 @@ class LocalUpdate(object):
             dataset, list(idxs))
         self.device = 'cuda' if args.gpu else 'cpu'
         # Default criterion set to NLL loss function
-        if args.model == 'exq':
+        if args.model == 'exq' or args.model=='resnet':
             self.criterion = nn.CrossEntropyLoss().to(self.device)
         else:
             self.criterion = nn.NLLLoss().to(self.device)
@@ -80,6 +80,9 @@ class LocalUpdate(object):
         if self.args.optimizer == 'sgd':
             optimizer = torch.optim.SGD(model.parameters(), lr=self.args.lr,
                                         momentum=0.5)
+        elif self.args.model == 'resnet':
+            optimizer = optim.SGD(model.parameters(), lr=0.01, momentum=0.9, weight_decay=0.0001)
+
         elif self.args.optimizer == 'adam':
             optimizer = torch.optim.Adam(model.parameters(), lr=self.args.lr,
                                          weight_decay=1e-4)
