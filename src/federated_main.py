@@ -16,7 +16,7 @@ import torch
 from tensorboardX import SummaryWriter
 
 from options import args_parser
-from models import ResNet
+from models import ResNet, Bottleneck
 from vae.mnist_vae import VaeAutoencoderClassifier
 from update import LocalUpdate, test_inference
 from models import MLP, CNNMnist, CNNFashion_Mnist, CNNCifar, ExquisiteNetV2, ExquisiteNetV1, BasicBlock
@@ -65,7 +65,7 @@ if __name__ == '__main__':
         global_model = ExquisiteNetV1(class_num=10, img_channels=1)
 
     elif args.model == 'resnet':
-        global_model = ResNet(BasicBlock, [2,2,2,2])
+        global_model = ResNet(Bottleneck, [3, 4, 6, 3])
 
     else:
         exit('Error: unrecognized model')
