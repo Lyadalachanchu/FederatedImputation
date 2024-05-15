@@ -109,6 +109,7 @@ class LocalUpdate(object):
                         model.train()
                     # print(f"log probs? {log_probs}")
                     # print(f"sum: {sum(log_probs)}")
+
                     loss = self.criterion(log_probs, labels)
                     loss.backward()
                     optimizer.step()
