@@ -187,5 +187,4 @@ if __name__ == '__main__':
                 format(args.num_generate, args.dirichlet, args.dataset, args.model, args.epochs, args.frac,
                        args.iid, args.local_ep, args.local_bs))
 
-    torch.save(global_model.state_dict(), f"C:\\Users\\LohithSai\\Desktop\\FederatedImputation\\vae_data\models\\"
-                                          f"{args.num_generate}_{args.model}_{args.dirichlet}_{args.dataset}.pth")
+    torch.save(global_model.state_dict(), f"C:\\Users\\LohithSai\\Desktop\\FederatedImputation\\vae_data\models\\{args.num_generate}_{args.model}_{args.dirichlet}.pth")
