@@ -195,7 +195,7 @@ class VaeAutoencoderClassifier(nn.Module):
     def train_model(
             self,
             training_data,
-            batch_size=64,
+            batch_size=32,
             alpha=1.0,
             epochs=5
     ) -> tuple[nn.Module, list, list, list, list, list]:

@@ -10,7 +10,7 @@ from torch import nn, optim
 from torch.utils.data import DataLoader, Dataset
 
 from impute import impute_naive
-from utils import vae_classifier_loss_fn
+from utils import vae_classifier_loss_fn, vae_loss_fn
 from vae.mnist_vae import VaeAutoencoderClassifier
 
 
@@ -56,7 +56,7 @@ class LocalUpdate(object):
 
         train_dataset = DatasetSplit(dataset, idxs_train)
         trained_vae = VaeAutoencoderClassifier(dim_encoding=2)
-        trained_vae.load_state_dict(torch.load("C:\\Users\\LohithSai\\Desktop\\FederatedImputation\\vae_data"
+        trained_vae.load_state_dict(torch.load("C:\\Users\\lyada\\Desktop\\FederatedImputation\\vae_data"
                                                f"\\models\\vae_{self.args.dirichlet}.pth"))
 
         generated_train_dataset = impute_naive(k=self.args.num_generate, trained_vae=trained_vae, initial_dataset=train_dataset)
@@ -90,6 +90,18 @@ class LocalUpdate(object):
             print(f"length train: {len(self.trainloader.dataset)}")
             local_losses = model.train_model(self.trainloader.dataset, epochs=self.args.local_ep)[1]
             print(f"losses: {local_losses}")
+            loss = np.mean(local_losses)
+            print(loss)
+            return model.state_dict(), loss
+        if self.args.model == 'cvae':
+            print(f"length train cvae: {len(self.trainloader.dataset)}")
+            print(type(model))
+            local_losses = model.train_model(
+    training_data=self.trainloader.dataset,
+    batch_size=32,
+    epochs=self.args.local_ep,
+    learning_rate=0.001
+)[1]
             loss = np.mean(local_losses)
             print(loss)
             return model.state_dict(), loss
@@ -137,7 +149,17 @@ class LocalUpdate(object):
             images, labels = images.to(self.device), labels.to(self.device)
 
             # Inference
-            outputs = model(images)
+            if self.args.model == 'cvae':
+                for i, image in enumerate(images):
+                    vl_fn = vae_loss_fn(beta=1.0)
+                    output = model(image, labels[i])
+                    loss += vl_fn(image, output, model.z_dist)
+                    total += 1
+                    print(f"test loss: {loss}")
+                continue
+
+            else:
+                outputs = model(images)
             if self.args.model == 'vae' or model is isinstance(model, VaeAutoencoderClassifier):
                 complete_loss_fn = vae_classifier_loss_fn(model.alpha, model.beta)
                 loss += complete_loss_fn(images, outputs, model.z_dist, labels)
@@ -176,7 +198,16 @@ def test_inference(args, model, test_dataset):
         images, labels = images.to(device), labels.to(device)
 
         # Inference
-        outputs = model(images)
+        if args.model == 'cvae':
+            for i, image in enumerate(images):
+                vl_fn = vae_loss_fn(beta=1.0)
+                output = model(image, labels[i])
+                loss += vl_fn(image, output, model.z_dist)
+                total += 1
+                print(f"test loss: {loss}")
+            continue
+        else:
+            outputs = model(images)
         if args.model == 'vae' or model is isinstance(model, VaeAutoencoderClassifier):
             complete_loss_fn = vae_classifier_loss_fn(model.alpha, model.beta)
             loss += complete_loss_fn(images, outputs, model.z_dist, labels)/len(testloader)
