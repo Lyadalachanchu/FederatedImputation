@@ -364,7 +364,7 @@ class ConditionalVae(nn.Module):
     """
     Classifier decoder that returns both images and its corresponding vector of label probabilities
     """
-    def __init__(self, dim_encoding):
+    def __init__(self, dim_encoding=3):
         super(ConditionalVae, self).__init__()
         self.z_dist = None
         self.encodings = None

@@ -105,7 +105,7 @@ if __name__ == '__main__':
             local_model = LocalUpdate(args=args, dataset=train_dataset,
                                       idxs=user_groups[idx], logger=logger)
             model_copy = None
-            if(args.model == 'vae'):
+            if(args.model == 'vae' or args.model == 'cvae'):
                 model_copy = type(global_model)()  # create a new instance of the same model
                 model_copy.load_state_dict(global_model.state_dict())
             else:
@@ -156,7 +156,7 @@ if __name__ == '__main__':
     print("|---- Avg Train Accuracy: {:.2f}%".format(100*train_accuracy[-1]))
     print("|---- Test Accuracy: {:.2f}%".format(100*test_acc))
     # Saving the objects train_loss and train_accuracy:
-    file_name = '../save/objects/fedimputed_{}_{}_{}_{}_{}_C[{}]_iid[{}]_E[{}]_B[{}].pkl'.\
+    file_name = '../save/objects/fedimputed_cvae_{}_{}_{}_{}_{}_C[{}]_iid[{}]_E[{}]_B[{}].pkl'.\
         format(args.num_generate, args.dirichlet, args.dataset, args.model, args.epochs, args.frac, args.iid,
                args.local_ep, args.local_bs)
 
@@ -176,7 +176,7 @@ if __name__ == '__main__':
     plt.plot(range(len(train_loss)), train_loss, color='r')
     plt.ylabel('Training loss')
     plt.xlabel('Communication Rounds')
-    plt.savefig('../save/fedimputed_{}_{}_{}_{}_{}_C[{}]_iid[{}]_E[{}]_B[{}]_loss.png'.
+    plt.savefig('../save/fedimputed_cvae_{}_{}_{}_{}_{}_C[{}]_iid[{}]_E[{}]_B[{}]_loss.png'.
                 format(args.num_generate, args.dirichlet, args.dataset, args.model, args.epochs, args.frac,
                        args.iid, args.local_ep, args.local_bs))
 
@@ -186,8 +186,8 @@ if __name__ == '__main__':
     plt.plot(range(len(train_accuracy)), train_accuracy, color='k')
     plt.ylabel('Average Accuracy')
     plt.xlabel('Communication Rounds')
-    plt.savefig('../save/fedimputed_{}_{}_{}_{}_{}_C[{}]_iid[{}]_E[{}]_B[{}]_acc.png'.
+    plt.savefig('../save/fedimputed_cvae_{}_{}_{}_{}_{}_C[{}]_iid[{}]_E[{}]_B[{}]_acc.png'.
                 format(args.num_generate, args.dirichlet, args.dataset, args.model, args.epochs, args.frac,
                        args.iid, args.local_ep, args.local_bs))
 
-    torch.save(global_model.state_dict(), f"C:\\Users\\lyada\\Desktop\\FederatedImputation\\vae_data\models\\{args.num_generate}_{args.model}_{args.dirichlet}.pth")
+    torch.save(global_model.state_dict(), f"C:\\Users\\LohithSai\\Desktop\\FederatedImputation\\vae_data\models\\{args.num_generate}_{args.model}_{args.dirichlet}_cvae.pth")

@@ -6,12 +6,13 @@ import torch
 import torch.nn.functional as F
 import numpy as np
 import torch
+from sklearn.metrics import f1_score
 from torch import nn, optim
 from torch.utils.data import DataLoader, Dataset
 
-from impute import impute_naive
+from impute import impute_naive, impute_cvae_naive
 from utils import vae_classifier_loss_fn, vae_loss_fn
-from vae.mnist_vae import VaeAutoencoderClassifier
+from vae.mnist_vae import VaeAutoencoderClassifier, ConditionalVae
 
 
 class DatasetSplit(Dataset):
@@ -55,11 +56,15 @@ class LocalUpdate(object):
         idxs_test = idxs[int(0.9*len(idxs)):]
 
         train_dataset = DatasetSplit(dataset, idxs_train)
-        trained_vae = VaeAutoencoderClassifier(dim_encoding=2)
-        trained_vae.load_state_dict(torch.load("C:\\Users\\lyada\\Desktop\\FederatedImputation\\vae_data"
-                                               f"\\models\\vae_{self.args.dirichlet}.pth"))
+        # trained_vae = VaeAutoencoderClassifier(dim_encoding=2)
+        # trained_vae.load_state_dict(torch.load("C:\\Users\\LohithSai\\Desktop\\FederatedImputation\\vae_data"
+        #                                        f"\\models\\vae_{self.args.dirichlet}.pth"))
+        trained_cvae = ConditionalVae(dim_encoding=3)
+        checkpoint = torch.load(f'C:\\Users\\LohithSai\\Desktop\\FederatedImputation\\vae_data\\models\\0_cvae_{self.args.dirichlet}.pth')
+        trained_cvae.load_state_dict(checkpoint)
 
-        generated_train_dataset = impute_naive(k=self.args.num_generate, trained_vae=trained_vae, initial_dataset=train_dataset)
+        # generated_train_dataset = impute_naive(k=self.args.num_generate, trained_vae=trained_vae, initial_dataset=train_dataset)
+        generated_train_dataset = impute_cvae_naive(k=100, trained_cvae=trained_cvae, initial_dataset=train_dataset)
         generated_train_dataset = [(torch.tensor(image), torch.tensor(label)) for image, label in
                                            generated_train_dataset]
 
@@ -155,7 +160,6 @@ class LocalUpdate(object):
                     output = model(image, labels[i])
                     loss += vl_fn(image, output, model.z_dist)
                     total += 1
-                    print(f"test loss: {loss}")
                 continue
 
             else:
@@ -189,6 +193,9 @@ def test_inference(args, model, test_dataset):
     model.eval()
     loss, total, correct = 0.0, 0.0, 0.0
 
+    pred_labels_list = []
+    true_labels_list = []
+
     device = 'cuda' if args.gpu else 'cpu'
     criterion = nn.NLLLoss().to(device)
     testloader = DataLoader(test_dataset, batch_size=128,
@@ -204,7 +211,6 @@ def test_inference(args, model, test_dataset):
                 output = model(image, labels[i])
                 loss += vl_fn(image, output, model.z_dist)
                 total += 1
-                print(f"test loss: {loss}")
             continue
         else:
             outputs = model(images)
@@ -215,6 +221,8 @@ def test_inference(args, model, test_dataset):
             pred_labels = pred_labels.view(-1)
             correct += torch.sum(torch.eq(pred_labels, labels)).item()
             total += len(labels)
+            pred_labels_list.append(pred_labels.cpu().numpy())
+            true_labels_list.append(labels.cpu().numpy())
         else:
             batch_loss = criterion(outputs, labels)
             loss += batch_loss.item()/len(testloader)
@@ -225,5 +233,9 @@ def test_inference(args, model, test_dataset):
             correct += torch.sum(torch.eq(pred_labels, labels)).item()
             total += len(labels)
 
+    pred_labels_all = np.concatenate(pred_labels_list, axis=0)
+    true_labels_all = np.concatenate(true_labels_list, axis=0)
+    f1_macro = f1_score(true_labels_all, pred_labels_all, average='macro')
+    f1_micro = f1_score(true_labels_all, pred_labels_all, average='micro')
     accuracy = correct/total
-    return accuracy, loss
+    return accuracy, loss, f1_macro, f1_micro
