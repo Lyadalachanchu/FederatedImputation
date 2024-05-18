@@ -1,4 +1,4 @@
-from utils import kl_loss, vae_loss_fn, vae_classifier_loss_fn
+from src.utils import kl_loss, vae_loss_fn, vae_classifier_loss_fn
 
 import torch
 from torch import Tensor, tensor, device, cuda

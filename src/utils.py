@@ -3,11 +3,13 @@
 # Python version: 3.6
 
 import copy
+import pickle
+
 import torch
 from torch import tensor
-from sampling import *
-from sampling import mnist_iid, mnist_noniid, mnist_noniid_unequal
-from sampling import cifar_iid, cifar_noniid
+from src.sampling import *
+from src.sampling import mnist_iid, mnist_noniid, mnist_noniid_unequal
+from src.sampling import cifar_iid, cifar_noniid
 from torch import nn
 from torch.distributions.kl import kl_divergence
 from torch.distributions.normal import Normal

@@ -23,13 +23,20 @@ def plot_three_d_latents(model, input, labels):
     plt.show()
 
 
-def plot_image(images: np.ndarray):
-    plt.figure()
-    for i in range(5):
-        plt.subplot(151 + i)
+def plot_image(images: np.ndarray, num_imgs=5):
+    plt.figure(figsize=(10, 10))  # adjust as needed
+    n_rows = (num_imgs - 1) // 5 + 1  # calculate the number of rows
+
+    for i in range(num_imgs):
+        # calculate current row and column
+        row = i // 5 + 1  # +1 because subplot indexing starts from 1, not 0
+        col = i % 5 + 1  # +1 to shift columns to 1-5 instead of 0-4
+
+        plt.subplot(n_rows, 5, (row - 1) * 5 + col)
         plt.axis('off')
         squeezed_img = np.squeeze(images[i])
         plt.imshow(squeezed_img)
+    plt.tight_layout()
 
 
 def plot_vae_training_result(
