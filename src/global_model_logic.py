@@ -9,7 +9,7 @@ def get_dirch_datalaoders(dirichlet_param):
     from torch.utils.data import DataLoader, Dataset
 
     lengths = [60000, 10000]
-    data = pickle.load(open(f'C:\\Users\\lyada\\Desktop\\FederatedImputation\\src\\jupyter_notebook\\gen_dataset_{dirichlet_param}.pkl', 'rb'))
+    data = pickle.load(open(f'C:\\Users\\LohithSai\\Desktop\\FederatedImputation\\src\\jupyter_notebook\\gen_dataset_{dirichlet_param}.pkl', 'rb'))
 
     generated_train_dataset, generated_test_dataset = random_split(data, lengths)
 
@@ -100,7 +100,7 @@ def train_model(dirichlet):
             test_loss,
             test_f1_score
         ))
-    torch.save(model.state_dict(), f'C:\\Users\\lyada\\Desktop\\FederatedImputation\\vae_data\\global_exq_{dirichlet}.pth')
+    torch.save(model.state_dict(), f'C:\\Users\\LohithSai\\Desktop\\FederatedImputation\\vae_data\\global_exq_{dirichlet}.pth')
     return train_losses, test_losses, f1_scores
 
 def main_train_for_all_dirichlet_params():
@@ -114,7 +114,7 @@ def main_train_for_all_dirichlet_params():
             'test_losses': test_losses,
             'f1_scores': f1_scores
         }
-
+    print(results)
     with open('results.pkl', 'wb') as f:
         pickle.dump(results, f)
 
