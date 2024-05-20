@@ -64,7 +64,7 @@ class LocalUpdate(object):
         trained_cvae.load_state_dict(checkpoint)
 
         # generated_train_dataset = impute_naive(k=self.args.num_generate, trained_vae=trained_vae, initial_dataset=train_dataset)
-        generated_train_dataset = impute_cvae_naive(k=100, trained_cvae=trained_cvae, initial_dataset=train_dataset)
+        generated_train_dataset = impute_cvae_naive(k=self.args.num_generate, trained_cvae=trained_cvae, initial_dataset=train_dataset)
         generated_train_dataset = [(torch.tensor(image), torch.tensor(label)) for image, label in
                                            generated_train_dataset]
 
