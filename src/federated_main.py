@@ -150,7 +150,7 @@ if __name__ == '__main__':
             print('Train Accuracy: {:.2f}% \n'.format(100*train_accuracy[-1]))
 
     # Test inference after completion of training
-    test_acc, test_loss = test_inference(args, global_model, test_dataset)
+    test_acc, test_loss, f1_macro, f1_micro,  = test_inference(args, global_model, test_dataset)
     print(f"trainloss: {train_loss}")
     print(f' \n Results after {args.epochs} global rounds of training:')
     print("|---- Avg Train Accuracy: {:.2f}%".format(100*train_accuracy[-1]))
@@ -161,7 +161,7 @@ if __name__ == '__main__':
                args.local_ep, args.local_bs)
 
     with open(file_name, 'wb') as f:
-        pickle.dump([train_losses_per_client, test_losses_per_client, test_accuracies_per_client], f)
+        pickle.dump([train_losses_per_client, test_losses_per_client, test_accuracies_per_client, f1_macro, f1_micro], f)
 
     print('\n Total Run Time: {0:0.4f}'.format(time.time()-start_time))
 
@@ -171,23 +171,23 @@ if __name__ == '__main__':
     matplotlib.use('Agg')
 
     # Plot Loss curve
-    plt.figure()
-    plt.title('Training Loss vs Communication rounds')
-    plt.plot(range(len(train_loss)), train_loss, color='r')
-    plt.ylabel('Training loss')
-    plt.xlabel('Communication Rounds')
-    plt.savefig('../save/fedimputed_cvae_{}_{}_{}_{}_{}_C[{}]_iid[{}]_E[{}]_B[{}]_loss.png'.
-                format(args.num_generate, args.dirichlet, args.dataset, args.model, args.epochs, args.frac,
-                       args.iid, args.local_ep, args.local_bs))
+    # plt.figure()
+    # plt.title('f1 micro vs Communication rounds')
+    # plt.plot(range(len(train_loss)), f1_micro, color='r')
+    # plt.ylabel('Training loss')
+    # plt.xlabel('Communication Rounds')
+    # plt.savefig('../save/fedimputed_cvae_{}_{}_{}_{}_{}_C[{}]_iid[{}]_E[{}]_B[{}]_loss.png'.
+    #             format(args.num_generate, args.dirichlet, args.dataset, args.model, args.epochs, args.frac,
+    #                    args.iid, args.local_ep, args.local_bs))
 
     # Plot Average Accuracy vs Communication rounds
-    plt.figure()
-    plt.title('Average Accuracy vs Communication rounds')
-    plt.plot(range(len(train_accuracy)), train_accuracy, color='k')
-    plt.ylabel('Average Accuracy')
-    plt.xlabel('Communication Rounds')
-    plt.savefig('../save/fedimputed_cvae_{}_{}_{}_{}_{}_C[{}]_iid[{}]_E[{}]_B[{}]_acc.png'.
-                format(args.num_generate, args.dirichlet, args.dataset, args.model, args.epochs, args.frac,
-                       args.iid, args.local_ep, args.local_bs))
+    # plt.figure()
+    # plt.title('Average Accuracy vs Communication rounds')
+    # plt.plot(range(len(train_accuracy)), train_accuracy, color='k')
+    # plt.ylabel('Average Accuracy')
+    # plt.xlabel('Communication Rounds')
+    # plt.savefig('../save/fedimputed_cvae_{}_{}_{}_{}_{}_C[{}]_iid[{}]_E[{}]_B[{}]_acc.png'.
+    #             format(args.num_generate, args.dirichlet, args.dataset, args.model, args.epochs, args.frac,
+    #                    args.iid, args.local_ep, args.local_bs))
 
     torch.save(global_model.state_dict(), f"C:\\Users\\LohithSai\\Desktop\\FederatedImputation\\vae_data\models\\{args.num_generate}_{args.model}_{args.dirichlet}_cvae.pth")

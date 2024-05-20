@@ -232,6 +232,8 @@ def test_inference(args, model, test_dataset):
             pred_labels = pred_labels.view(-1)
             correct += torch.sum(torch.eq(pred_labels, labels)).item()
             total += len(labels)
+            pred_labels_list.append(pred_labels.cpu().numpy())
+            true_labels_list.append(labels.cpu().numpy())
 
     pred_labels_all = np.concatenate(pred_labels_list, axis=0)
     true_labels_all = np.concatenate(true_labels_list, axis=0)
