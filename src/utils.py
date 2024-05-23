@@ -7,9 +7,9 @@ import pickle
 
 import torch
 from torch import tensor
-from src.sampling import *
-from src.sampling import mnist_iid, mnist_noniid, mnist_noniid_unequal
-from src.sampling import cifar_iid, cifar_noniid
+from sampling import *
+from sampling import mnist_iid, mnist_noniid, mnist_noniid_unequal
+from sampling import cifar_iid, cifar_noniid
 from torch import nn
 from torch.distributions.kl import kl_divergence
 from torch.distributions.normal import Normal
@@ -27,6 +27,7 @@ def get_dataset(args):
         apply_transform = transforms.Compose(
             [transforms.ToTensor(),
              transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
+
 
         train_dataset = datasets.CIFAR10(data_dir, train=True, download=True,
                                        transform=apply_transform)
@@ -55,9 +56,12 @@ def get_dataset(args):
         else:
             data_dir = '../data/fmnist/'
 
+        # apply_transform = transforms.Compose([
+        #     transforms.ToTensor(),
+        #     transforms.Normalize((0.1307,), (0.3081,))])
         apply_transform = transforms.Compose([
             transforms.ToTensor(),
-            transforms.Normalize((0.1307,), (0.3081,))])
+            transforms.Lambda(lambda x: torch.round(x))])
 
         train_dataset = datasets.MNIST(data_dir, train=True, download=True,
                                        transform=apply_transform)
@@ -125,7 +129,7 @@ def exp_details(args):
 
 
 def reg_loss_fn():
-    mse = nn.MSELoss(reduction='sum')
+    mse = nn.MSELoss(reduction="mean")
     return lambda input, output: (
         mse(input, output)
     )

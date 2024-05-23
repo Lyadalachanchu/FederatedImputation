@@ -59,16 +59,16 @@ class LocalUpdate(object):
         # trained_vae = VaeAutoencoderClassifier(dim_encoding=2)
         # trained_vae.load_state_dict(torch.load("C:\\Users\\LohithSai\\Desktop\\FederatedImputation\\vae_data"
         #                                        f"\\models\\vae_{self.args.dirichlet}.pth"))
-        trained_cvae = ConditionalVae(dim_encoding=3)
-        checkpoint = torch.load(f'C:\\Users\\LohithSai\\Desktop\\FederatedImputation\\vae_data\\models\\0_cvae_{self.args.dirichlet}.pth')
-        trained_cvae.load_state_dict(checkpoint)
+        # trained_cvae = ConditionalVae(dim_encoding=3)
+        # checkpoint = torch.load(f'C:\\Users\\lyada\\Desktop\\FederatedImputation\\vae_data\\models\\0_cvae_{self.args.dirichlet}.pth')
+        # trained_cvae.load_state_dict(checkpoint)
 
         # generated_train_dataset = impute_naive(k=self.args.num_generate, trained_vae=trained_vae, initial_dataset=train_dataset)
-        generated_train_dataset = impute_cvae_naive(k=self.args.num_generate, trained_cvae=trained_cvae, initial_dataset=train_dataset)
-        generated_train_dataset = [(torch.tensor(image), torch.tensor(label)) for image, label in
-                                           generated_train_dataset]
-
-        trainloader = DataLoader(generated_train_dataset,
+        # generated_train_dataset = impute_cvae_naive(k=self.args.num_generate, trained_cvae=trained_cvae, initial_dataset=train_dataset)
+        # generated_train_dataset = [(torch.tensor(image), torch.tensor(label)) for image, label in
+        #                                    generated_train_dataset]
+        print(f"max: {train_dataset[0][0].max().item()}")
+        trainloader = DataLoader(train_dataset,
                                  batch_size=self.args.local_bs, shuffle=True)
         validloader = DataLoader(DatasetSplit(dataset, idxs_val),
                                  batch_size=int(len(idxs_val)/10), shuffle=True)
@@ -234,10 +234,13 @@ def test_inference(args, model, test_dataset):
             total += len(labels)
             pred_labels_list.append(pred_labels.cpu().numpy())
             true_labels_list.append(labels.cpu().numpy())
-
-    pred_labels_all = np.concatenate(pred_labels_list, axis=0)
-    true_labels_all = np.concatenate(true_labels_list, axis=0)
-    f1_macro = f1_score(true_labels_all, pred_labels_all, average='macro')
-    f1_micro = f1_score(true_labels_all, pred_labels_all, average='micro')
-    accuracy = correct/total
+    f1_macro = 0.0
+    f1_micro = 0.0
+    accuracy = 0.0
+    if args.model != 'cvae':
+        pred_labels_all = np.concatenate(pred_labels_list, axis=0)
+        true_labels_all = np.concatenate(true_labels_list, axis=0)
+        f1_macro = f1_score(true_labels_all, pred_labels_all, average='macro')
+        f1_micro = f1_score(true_labels_all, pred_labels_all, average='micro')
+        accuracy = correct/total
     return accuracy, loss, f1_macro, f1_micro
