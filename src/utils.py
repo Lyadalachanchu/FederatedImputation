@@ -129,7 +129,7 @@ def exp_details(args):
 
 
 def reg_loss_fn():
-    mse = nn.MSELoss(reduction="mean")
+    mse = nn.MSELoss(reduction="sum")
     return lambda input, output: (
         mse(input, output)
     )
